@@ -1,15 +1,31 @@
 pipeline {
     agent any
-
     triggers {
         githubPush()
-}
-
+    }
     stages {
-        stage('Hello from git') {
+        stage('Checkout') {
             steps {
-                echo 'Hello github'
+                script {
+                    // Checkout the latest code from the repository
+                    git url: 'https://github.com/Xeno367/SonarQB.git', branch: 'main'
+                }
+            }
+        }
+        stage('Identify Changed Files') {
+            steps {
+                script {
+                    // Get the list of changed files in the last commit
+                    def changedFiles = sh(script: 'git diff-tree --no-commit-id --name-only -r HEAD', returnStdout: true).trim()
+                    echo "Changed files: ${changedFiles}"
+                }
             }
         }
     }
+    post {
+        always {
+            echo 'Pipeline finished.'
+        }
+    }
 }
+
